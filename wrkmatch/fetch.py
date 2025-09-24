@@ -6,15 +6,24 @@ import pandas as pd
 from .normalize import slug_candidates
 from .ats_clients import ATS_FUNCS, Job
 
-
-def discover_and_fetch(companies: List[str], max_workers: int = 16) -> pd.DataFrame:
-    """Probe known ATS endpoints for each company and return a normalized jobs DataFrame."""
+def discover_and_fetch(companies: List[str], max_workers: int = 12) -> pd.DataFrame:
+    """Probe known ATS endpoints for each company and return a normalized jobs DataFrame.
+    Optimizations:
+      - Early-exit per company after the first ATS that returns jobs.
+      - Early-exit per slug candidate as soon as jobs are found.
+    """
     results: Dict[str, List[Job]] = {}
 
     def try_company(company: str) -> Tuple[str, List[Job]]:
         jobs: List[Job] = []
         tried = set()
-        for cand in slug_candidates(company):
+
+        # Try the most likely slug candidates first
+        candidates = slug_candidates(company)
+        # heuristic: check compact/dashed first (keep original order)
+        candidates = list(dict.fromkeys(candidates))  # de-dupe preserve order
+
+        for cand in candidates:
             if cand in tried:
                 continue
             tried.add(cand)
@@ -25,6 +34,8 @@ def discover_and_fetch(companies: List[str], max_workers: int = 16) -> pd.DataFr
                     fetched = []
                 if fetched:
                     jobs.extend(fetched)
+                    # Found the company's ATS; stop trying others
+                    return (company, jobs)
         return (company, jobs)
 
     with ThreadPoolExecutor(max_workers=max_workers) as ex:

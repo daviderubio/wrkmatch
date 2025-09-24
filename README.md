@@ -1,35 +1,6 @@
-# wrkmatch — Project Scaffold (GitHub Codespaces ready)
-
----
-
-## Project tree
-
-```
-.
-├── app/
-│   └── streamlit_app.py
-├── wrkmatch/
-│   ├── __init__.py
-│   ├── ats_clients.py
-│   ├── fetch.py
-│   ├── io_utils.py
-│   ├── normalize.py
-│   └── scoring.py
-├── sample_data/
-│   └── sample_connections.csv
-├── .devcontainer/
-│   └── devcontainer.json
-├── .gitignore
-├── requirements.txt
-├── README.md
-└── cli.py
-```
-
----
+# wrkmatch
 
 ## README.md
-
-# wrkmatch
 
 Find the companies where you have the **best shot**: cross your LinkedIn connections (CSV export) with public ATS job boards (Greenhouse, Lever, Ashby, Workable, Recruitee), then rank companies by **# contacts** × **# open roles**.
 
@@ -43,7 +14,18 @@ Find the companies where you have the **best shot**: cross your LinkedIn connect
    ```bash
    streamlit run app/streamlit_app.py --server.runOnSave true
    ```
+   If you see streamlit: command not found, install requirements
 5. Open the forwarded URL. Upload your **LinkedIn Connections CSV** and click **Scan companies**.
+
+## ✨ Features
+
+- **Upload** your LinkedIn Connections CSV (exported from LinkedIn)
+- **KPIs & charts** for your network (unique companies, top companies by connections)
+- **Scan public ATS boards** for open roles at those companies
+- **Jobs KPIs & trends** (roles by source; monthly trend when dates exist)
+- **Ranked targets** table (contacts × roles, with senior-title signal)
+- **Company drill-downs** (see your contacts + live job links)
+- **CSV downloads** for jobs and company scores
 
 ## Quickstart — Local
 
@@ -65,6 +47,17 @@ LinkedIn → Settings & Privacy → Data privacy → Get a copy of your data →
 * **Details:** expand a company to see your contacts and role listings with links.
 * **Downloads:** one‑click CSV exports of jobs and company scores.
 
+## How to use the app
+
+1. Upload your Connections.csv.
+2. Review Connections — quick KPIs (totals + top companies chart).
+3. Click Scan companies for public job boards.
+4. Inspect Jobs — KPIs & trends and the Ranked targets table.
+5. Open any company’s expander to see your contacts and live roles.
+6. Use the Download buttons for jobs_report.csv and company_scores.csv.
+
+Tip: If your network has thousands of companies, the scan can take time. Use the app’s options (if present) to limit the number of companies to scan first (e.g., top 100 by your connections), then expand later.
+
 ## CLI (headless)
 
 Run the pipeline and save CSV outputs without UI:
@@ -83,7 +76,7 @@ Creates `out/company_scores.csv` and `out/jobs_report.csv`.
 
 ## License
 
-MIT. 
+MIT 
 
 ---
 
@@ -126,9 +119,27 @@ out/
 
 ---
 
-### How to use this scaffold
+---
 
-1. Create a **new GitHub repo** and paste these files with the same structure.
-2. Open **Codespaces** from the repo (Code ▸ Codespaces ▸ Create).
-3. In the built container, run `streamlit run app/streamlit_app.py` and open the forwarded port.
-4. Upload your LinkedIn `Connections.csv` (or use `sample_data/sample_connections.csv` to demo), then click **Scan**.
+## Project tree
+
+```
+.
+├── app/
+│   └── streamlit_app.py
+├── wrkmatch/
+│   ├── __init__.py
+│   ├── ats_clients.py
+│   ├── fetch.py
+│   ├── io_utils.py
+│   ├── normalize.py
+│   └── scoring.py
+├── sample_data/
+│   └── sample_connections.csv
+├── .devcontainer/
+│   └── devcontainer.json
+├── .gitignore
+├── requirements.txt
+├── README.md
+└── cli.py
+```
