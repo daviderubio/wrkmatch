@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import os, sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from __future__ import annotations
 import pandas as pd
 import streamlit as st
 import altair as alt
