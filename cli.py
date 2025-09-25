@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 from wrkmatch import read_connections, discover_and_fetch, compute_scores
+from wrkmatch.ats_clients import ATS_CLIENTS
 
 
 def main():

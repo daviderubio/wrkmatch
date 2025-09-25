@@ -130,3 +130,20 @@ def recruitee_jobs(slug: str) -> List[Job]:
     return jobs
 
 ATS_FUNCS = [greenhouse_jobs, lever_jobs, ashby_jobs, workable_jobs, recruitee_jobs]
+
+# More Clients
+from .ats_clients_more import (
+    SmartRecruitersClient,
+    PersonioClient,
+    BambooHRClient,
+    WorkdayCXSClient,
+)
+
+ATS_CLIENTS = [
+    # ... your existing ones: GreenhouseClient(), LeverClient(), AshbyClient(), WorkableClient(), RecruiteeClient(), ...
+    SmartRecruitersClient(),
+    PersonioClient(),
+    BambooHRClient(),
+    WorkdayCXSClient(),  # keep this last / optional since it’s experimental
+]
+

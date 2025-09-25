@@ -100,7 +100,7 @@ def _discover_and_fetch_cached(companies_list):
     return discover_and_fetch(companies_list)
 
 if start:
-    with st.spinner("Probing ATS job boards (Greenhouse, Lever, Ashby, Workable, Recruitee)..."):
+    with st.spinner("Probing ATS job boards (eg. Greenhouse)..."):
         jobs_df = _discover_and_fetch_cached(companies)
     st.session_state["jobs_df"] = jobs_df
 
