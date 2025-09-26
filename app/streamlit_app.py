@@ -51,13 +51,22 @@ st.success(f"Loaded {len(connections_df):,} connections with company info.")
 # Connections KPIs & charts
 # =========================
 with st.container():
-    st.subheader("Connections — quick KPIs")
+    st.subheader("Connections — KPIs")
+
+    # Normalize names for aggregation (uses normalize_company_name)
+    df_kpi = connections_df.copy()
+    df_kpi["norm_company"] = df_kpi["Company"].map(normalize_company_name)
+
     comp_counts = (
-        connections_df.assign(norm=lambda d: d["Company"].map(normalize_company_name))
-        .groupby("norm").size().rename("n").reset_index()
+        df_kpi.groupby("norm_company")
+        .size()
+        .rename("n")
+        .reset_index()
+        .sort_values("n", ascending=False)
     )
-    total_connections = int(len(connections_df))
-    unique_companies = int(comp_counts.shape[0])
+
+    total_connections = int(len(df_kpi))
+    unique_companies = int(df_kpi["norm_company"].dropna().nunique())
     avg_per_company = float(comp_counts["n"].mean()) if not comp_counts.empty else 0.0
 
     c1, c2, c3 = st.columns(3)
@@ -65,18 +74,53 @@ with st.container():
     c2.metric("Unique companies", f"{unique_companies:,}")
     c3.metric("Avg connections/company", f"{avg_per_company:.2f}")
 
-    top_companies = comp_counts.sort_values("n", ascending=False).head(20)
+    # Top companies bar
+    top_companies = comp_counts.head(20).rename(columns={"norm_company": "Company"})
     if not top_companies.empty:
         chart = (
             alt.Chart(top_companies)
             .mark_bar()
             .encode(
                 x=alt.X("n:Q", title="# connections"),
-                y=alt.Y("norm:N", sort="-x", title="Company (normalized)"),
+                y=alt.Y("Company:N", sort="-x", title="Company (normalized)"),
+                tooltip=["Company:N", "n:Q"],
             )
             .properties(height=500)
         )
         st.altair_chart(chart, use_container_width=True)
+
+    # Connections per Year
+    if "Connected On" in df_kpi.columns:
+        df_kpi["Connected On"] = pd.to_datetime(df_kpi["Connected On"], errors="coerce")
+        year_counts = (
+            df_kpi.dropna(subset=["Connected On"])
+                  .assign(year=lambda d: d["Connected On"].dt.year)
+                  .groupby("year").size()
+                  .reset_index(name="connections")
+                  .sort_values("year")
+        )
+        if not year_counts.empty:
+            st.markdown("#### Connections per Year")
+            chart_year = (
+                alt.Chart(year_counts)
+                .mark_line(point=True)
+                .encode(
+                    x=alt.X("year:O", title="Year"),
+                    y=alt.Y("connections:Q", title="Connections"),
+                    tooltip=["year:O", "connections:Q"],
+                )
+                .interactive()
+            )
+            st.altair_chart(chart_year, use_container_width=True)
+
+    else:
+        st.info("No `Connected On` column in your CSV, so time-series charts are hidden.")
+
+    # ---- New: Warm reach table (>= 3 contacts) ----
+    warm = comp_counts[comp_counts["n"] >= 3].rename(columns={"norm_company": "Company", "n": "contacts"})
+    if not warm.empty:
+        st.markdown("#### Warm reach companies (≥ 3 contacts)")
+        st.dataframe(warm)
 
 # -------------------------
 # Build company list (limit to top N)
