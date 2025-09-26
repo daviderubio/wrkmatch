@@ -129,9 +129,8 @@ def recruitee_jobs(slug: str) -> List[Job]:
             ))
     return jobs
 
-ATS_FUNCS = [greenhouse_jobs, lever_jobs, ashby_jobs, workable_jobs, recruitee_jobs]
 
-# More Clients
+# ---- New boards via wrapper functions over class-based clients ----
 from .ats_clients_more import (
     SmartRecruitersClient,
     PersonioClient,
@@ -139,11 +138,87 @@ from .ats_clients_more import (
     WorkdayCXSClient,
 )
 
-ATS_CLIENTS = [
-    # ... your existing ones: GreenhouseClient(), LeverClient(), AshbyClient(), WorkableClient(), RecruiteeClient(), ...
-    SmartRecruitersClient(),
-    PersonioClient(),
-    BambooHRClient(),
-    WorkdayCXSClient(),  # keep this last / optional since it’s experimental
-]
+def smartrecruiters_jobs(slug: str) -> List[Job]:
+    client = SmartRecruitersClient()
+    jobs: List[Job] = []
+    for j in client.fetch_jobs(slug):
+        jobs.append(Job(
+            company=j.company or slug,
+            source="smartrecruiters",
+            title=j.title or "",
+            location=j.location or "",
+            department="",  # not provided
+            url=j.url or "",
+            posted_at=(j.posted_at.isoformat() + "Z") if getattr(j, "posted_at", None) else None,
+        ))
+    return jobs
 
+
+def personio_jobs(slug: str) -> List[Job]:
+    client = PersonioClient()
+    jobs: List[Job] = []
+    for j in client.fetch_jobs(slug):
+        jobs.append(Job(
+            company=j.company or slug,
+            source="personio",
+            title=j.title or "",
+            location=j.location or "",
+            department="",  # not provided
+            url=j.url or "",
+            posted_at=(j.posted_at.isoformat() + "Z") if getattr(j, "posted_at", None) else None,
+        ))
+    return jobs
+
+
+def bamboohr_jobs(slug: str) -> List[Job]:
+    client = BambooHRClient()
+    jobs: List[Job] = []
+    for j in client.fetch_jobs(slug):
+        jobs.append(Job(
+            company=j.company or slug,
+            source="bamboohr",
+            title=j.title or "",
+            location=j.location or "",
+            department="",  # not provided
+            url=j.url or "",
+            posted_at=(j.posted_at.isoformat() + "Z") if getattr(j, "posted_at", None) else None,
+        ))
+    return jobs
+
+
+def workday_cxs_jobs(slug: str) -> List[Job]:
+    """
+    slug should be 'host/tenant', e.g. 'deloitte.wd3.myworkdayjobs.com/Deloitte'.
+    """
+    client = WorkdayCXSClient()
+    kwargs = {}
+    if "/" in slug:
+        host, tenant = slug.split("/", 1)
+        kwargs = {"host": host, "tenant": tenant}
+    jobs: List[Job] = []
+    for j in client.fetch_jobs(slug, **kwargs):
+        company_name = (kwargs.get("tenant") if kwargs else j.company) or slug
+        jobs.append(Job(
+            company=company_name,
+            source="workday_cxs",
+            title=j.title or "",
+            location=j.location or "",
+            department="",  # not provided
+            url=j.url or "",
+            posted_at=(j.posted_at.isoformat() + "Z") if getattr(j, "posted_at", None) else None,
+        ))
+    return jobs
+
+
+# Master list your pipeline iterates over
+ATS_FUNCS = [
+    greenhouse_jobs,
+    lever_jobs,
+    ashby_jobs,
+    workable_jobs,
+    recruitee_jobs,
+    smartrecruiters_jobs,
+    personio_jobs,
+    bamboohr_jobs,
+    workday_cxs_jobs,  # experimental: varies by tenant
+]
